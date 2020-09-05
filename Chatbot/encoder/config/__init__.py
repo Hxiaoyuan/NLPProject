@@ -52,8 +52,10 @@ LOAD_MODEL_FILE_PATH = os.path.join('../', 'data', 'save')
 
 '''
 
-bert_batch_size = 2
-bert_n_iteration = 6
+bert_batch_size = 10
+bert_n_iteration = 24
+
+BERT_PRINT_EVERY = 1  # 每进行多少次输出损失信息
 
 '''
     bert_max_length: 训练序列的最大长度
@@ -63,7 +65,7 @@ bert_hidden_size = 768
 bert_n_layers = 2
 bert_att_model_name = 'dot'
 bert_dropout = 0.1
-bert_lr = 0.01
+bert_lr = 0.001
 
 BERT_PAD = '[PAD]'
 

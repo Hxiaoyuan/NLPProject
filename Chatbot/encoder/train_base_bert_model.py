@@ -1,4 +1,3 @@
-from pytorch_pretrained_bert import BertTokenizer, BertModel
 from Chatbot.encoder.net.base_bert_model import *
 from Chatbot.encoder.config import *
 import Chatbot.encoder.voc.voc as VOC
@@ -24,12 +23,20 @@ def trainIters(encoder, decoder, encoder_optimizer, decoder_optimizer):
         [random.choice(pairs) for _ in range(bert_batch_size)], bertVoc)
         for _ in range(bert_n_iteration)]
 
-    for i in range(start_iteration, bert_n_iteration + 1):
-        train_batche = training_batches[i]
+    print_loss = 0
+    for iteration in range(start_iteration, bert_n_iteration):
+        train_batche = training_batches[iteration]
         _input, input_lengths, _output, mask, out_max_length = train_batche
         loss = train(_input, input_lengths, _output, mask, out_max_length,
                      encoder, decoder, encoder_optimizer, decoder_optimizer, bertVoc)
-        #
+
+        print_loss += loss
+        # 打印进度
+        if iteration % BERT_PRINT_EVERY == 0:
+            print_loss_log = print_loss / BERT_PRINT_EVERY
+            print("Iteration: {}; Percent complete: {:.1f}%; Average loss: {:.4f}"
+                  .format(iteration, iteration / (bert_n_iteration - 1) * 100, print_loss_log))
+            print_loss = 0
 
 
 def train(_input, input_lengths, _output, mask, out_max_length,
@@ -41,7 +48,7 @@ def train(_input, input_lengths, _output, mask, out_max_length,
     # 初始化变量
     loss = 0
     print_losses = []
-    n_total = 0
+    n_totals = 0
     # _input
     encoder_output, encoder_hidden = encoder(_input, input_lengths)
 
@@ -57,11 +64,19 @@ def train(_input, input_lengths, _output, mask, out_max_length,
     for t in range(out_max_length):
         decoder_out, decoder_hidden = decoder(decoder_input, decoder_hidden, encoder_output)
         _, topi = decoder_out.topk(1)
-        decoder_input = torch.LongTensor([[topi[i][0] for i in range(bert_batch_size)]])
+        # decoder_input = torch.LongTensor([[topi[i][0] for i in range(bert_batch_size)]])
+        decoder_input = [topi[i][0] for i in range(bert_batch_size)]
+        decoder_input = BaseBertVoc.idsToBertVec(decoder_input, bert_voc)
         decoder_input = decoder_input.to(device)
         # 计算损失
         mask_loss, nTotal = maskNLLLoss(decoder_out, _output[t], mask[t])
-    return ""
+        loss += mask_loss
+        print_losses.append(mask_loss.item() * nTotal)
+        n_totals += nTotal
+    loss.backward()
+    encoder_optimizer.step()
+    decoder_optimizer.step()
+    return sum(print_losses) / n_totals
 
 
 if __name__ == '__main__':

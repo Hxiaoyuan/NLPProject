@@ -92,7 +92,7 @@ class BaseBertVoc():
         # for inp in inps:
         outs, mask, out_length = BaseBertVoc.outputInit(output_batch)
         outs = BaseBertVoc.handlerTargetSentens(outs, bert_voc)
-        return inps, inp_length, outs, mask, out_length,
+        return inps, inp_length, outs, mask, out_length
 
     @staticmethod
     def binaryMatrix(l):
@@ -163,6 +163,22 @@ class BaseBertVoc():
         # 使用后四行作为向量
         vec_last4 = [torch.sum(torch.stack(embedding)[-4:], 0) for embedding in tokens_embeddings]
         return vec_last4[0].view(1, 1, -1)
+
+    @staticmethod
+    def idsToBertVec(ids, bert_voc):
+        segment_tensor = torch.tensor([[1] * len(ids)])
+        encoder_layers, _ = bert_voc.bertModel(torch.tensor([ids]), segment_tensor)
+        token_embedding = []
+        for token_i in range(len(ids)):
+            hidden_layers = []
+            for layer_i in range(len(encoder_layers)):
+                hidden_layers.append(encoder_layers[layer_i][0][token_i])
+            token_embedding.append(hidden_layers)
+        vec_last4 = [torch.sum(torch.stack(embedding)[-4:], 0) for embedding in token_embedding]
+        vec_last4 = [vec.tolist() for vec in vec_last4]
+        vec_last4 = torch.tensor(vec_last4)
+
+        return vec_last4.view(1, vec_last4.shape[0], -1)
 
 
 if __name__ == '__main__':
