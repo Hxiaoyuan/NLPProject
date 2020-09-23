@@ -52,10 +52,11 @@ LOAD_MODEL_FILE_PATH = os.path.join('../', 'data', 'save')
 
 '''
 
-bert_batch_size = 10
-bert_n_iteration = 24
+bert_batch_size = 18
+bert_n_iteration = 180
 
-BERT_PRINT_EVERY = 1  # 每进行多少次输出损失信息
+BERT_PRINT_EVERY = 3  # 每进行多少次输出损失信息
+BERT_SAVE_MODEL_EVERY = 10  # 训练多少次进行模型参数的保存
 
 '''
     bert_max_length: 训练序列的最大长度
@@ -65,11 +66,13 @@ bert_hidden_size = 768
 bert_n_layers = 2
 bert_att_model_name = 'dot'
 bert_dropout = 0.1
-bert_lr = 0.001
+bert_lr = 0.0001
 
 BERT_PAD = '[PAD]'
 
 LOAD_CORPUS_PATH = os.path.join('../', 'data', corpus_name)
 LOAD_CORPUS_NAME = "formatted_movie_lines_test.txt"
-LOAD_BASE_BERT_MODEL_FILE = 'model_base_bert_luong_'
+IS_LOAD_MODEL = True
+SAVE_BASE_BERT_MODEL_FILE = 'model_base_bert_luong_'
+LOAD_BASE_BERT_MODEL_FILE = 'model_base_bert_luong_179.pt'
 LOAD_BASE_BERT_MODEL_FILE_PATH = os.path.join('../', 'data', 'save')

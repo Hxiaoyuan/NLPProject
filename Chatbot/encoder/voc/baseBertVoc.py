@@ -24,6 +24,7 @@ class BaseBertVoc():
         self.cls = '[CLS]'
         self.sep = '[SEP]'
         self.bertModel = BertModel.from_pretrained('bert-base-uncased')
+        self.word_nums = len(self.bertTokenizer.vocab)
         self.bertModel.eval()
 
     @staticmethod
@@ -194,4 +195,3 @@ if __name__ == '__main__':
     training_batches = [BaseBertVoc.batch2TrainData(
         [random.choice(pairs) for _ in range(batch_size)], bertVoc)
         for _ in range(n_iteration)]
-    print("ssssssss")
