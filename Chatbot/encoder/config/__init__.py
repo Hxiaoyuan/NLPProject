@@ -46,14 +46,17 @@ LAST_NEW_MODEL_FILE_NAME = "model_parameter_Luong"
 LOAD_MODEL_FILE_NAME = 'model_parameter_Luong_7150.pt'
 LOAD_MODEL_FILE_PATH = os.path.join('../', 'data', 'save')
 
+
 # ============================== 基于bert的改良机器人 config ======================
 
 '''
-
+改用bert 预训练
+相关的超参数
+bert_batch_size： 分批大小
 '''
 
-bert_batch_size = 18
-bert_n_iteration = 180
+bert_batch_size = 20
+bert_n_iteration = 1000
 
 BERT_PRINT_EVERY = 3  # 每进行多少次输出损失信息
 BERT_SAVE_MODEL_EVERY = 10  # 训练多少次进行模型参数的保存
@@ -72,7 +75,8 @@ BERT_PAD = '[PAD]'
 
 LOAD_CORPUS_PATH = os.path.join('../', 'data', corpus_name)
 LOAD_CORPUS_NAME = "formatted_movie_lines_test.txt"
+# 是否加载模型
 IS_LOAD_MODEL = True
 SAVE_BASE_BERT_MODEL_FILE = 'model_base_bert_luong_'
-LOAD_BASE_BERT_MODEL_FILE = 'model_base_bert_luong_179.pt'
+LOAD_BASE_BERT_MODEL_FILE = 'model_base_bert_luong_489.pt'
 LOAD_BASE_BERT_MODEL_FILE_PATH = os.path.join('../', 'data', 'save')

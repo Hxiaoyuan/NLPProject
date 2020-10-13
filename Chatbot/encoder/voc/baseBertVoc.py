@@ -28,7 +28,7 @@ class BaseBertVoc():
         self.bertModel.eval()
 
     @staticmethod
-    def zerpPadding(input_sen):
+    def zeroPadding(input_sen):
         import itertools
 
         tmp_l = list(itertools.zip_longest(*input_sen, fillvalue=BERT_PAD))
@@ -43,13 +43,13 @@ class BaseBertVoc():
     @staticmethod
     def inputInit(input_sen):
         lengths = torch.tensor([len(sen) for sen in input_sen])
-        input_sen = BaseBertVoc.zerpPadding(input_sen)
+        input_sen = BaseBertVoc.zeroPadding(input_sen)
         return input_sen, lengths
 
     @staticmethod
     def outputInit(output_sen):
         max_length = max([len(output) for output in output_sen])
-        output_sen = BaseBertVoc.zerpPadding(output_sen)
+        output_sen = BaseBertVoc.zeroPadding(output_sen)
         mask = BaseBertVoc.binaryMatrix(output_sen)
         mask = torch.LongTensor(mask).t()
         return output_sen, mask, max_length
