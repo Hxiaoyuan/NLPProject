@@ -3,13 +3,16 @@ from Chatbot.encoder.net import *
 import Chatbot.encoder.voc.voc as VOC
 import torch.optim as optim
 import random
+from tensorboardX import SummaryWriter
 
+writer = SummaryWriter(MODEL_INFO_SAVE_PATH)
 
 def maskNLLLoss(inp, target, mask):
     nTotal = mask.sum()
     crossEntropy = -torch.log(torch.gather(inp, 1, target.view(-1, 1)).squeeze(1))
     # d = crossEntropy.masked_select(mask.byte())
-    loss = crossEntropy.masked_select(mask.byte()).mean()
+    mask = mask == 1
+    loss = crossEntropy.masked_select(mask).mean()
     loss = loss.to(device)
     return loss, nTotal.item()
 
@@ -28,24 +31,18 @@ def train(input_variable, lengths, target_variable, mask, max_target_len,
     loss = 0
     print_losses = []
     n_totals = 0
-
     encoder_output, encoder_hidden = encoder(input_variable, lengths)
-
     decoder_input = torch.LongTensor([[SOS_token for _ in range(batch_size)]])
-    # decoder_input = decoder_input.to(device)
     decoder_hidden = encoder_hidden[:decoder.n_layers]
-
     for t in range(max_target_len):
         decoder_output, decoder_hidden = decoder(decoder_input, decoder_hidden, encoder_output)
         _, topi = decoder_output.topk(1)
         decoder_input = torch.LongTensor([[topi[i][0] for i in range(batch_size)]])
-        decoder_input = decoder_input.to(device)
         # 计算并累计损失
         mask_loss, nTotal = maskNLLLoss(decoder_output, target_variable[t], mask[t])
         loss += mask_loss
         print_losses.append(mask_loss.item() * nTotal)
         n_totals += nTotal
-
     loss.backward()
     encoder_optimizer.step()
     decoder_optimizer.step()
@@ -74,6 +71,7 @@ def trainIters(model_name, voc, pairs, encoder, decoder, encoder_optimizer,
                      batch_size, clip)
         print_loss += loss
 
+        writer.add_scalar('loss', loss, global_step=iteration)
         # 打印进度
         if iteration % PRINT_EVERY == 0:
             print_loss_avg = print_loss / PRINT_EVERY
@@ -97,14 +95,13 @@ def trainIters(model_name, voc, pairs, encoder, decoder, encoder_optimizer,
             print("model saving sucess")
 
 
-
-batch_size = 64
-learning_rate = 0.0005
-n_iteration = 8000
+batch_size = 32
+learning_rate = 0.0001
+n_iteration = 10001
 print_every = 10
 decoder_learning_ratio = 5.0
-isLoadModel = True
-# isLoadModel = False
+# isLoadModel = True
+isLoadModel = False
 modelFileIsExist = os.path.isfile(os.path.join(MODEL_INFO_SAVE_PATH, MODEL_INFO_FILE_NAME))
 print("model info file is exist: {}".format(modelFileIsExist))
 
@@ -139,8 +136,9 @@ if __name__ == '__main__':
 
     if isLoadModel and modelFileIsExist:
         embedding.load_state_dict(embedding_sd)
+
     encoder = EncoderRNN(hidden_size, embedding, encoder_n_layers, dropout)
-    decoder =LuongDecoderRnn('dot', embedding, hidden_size, voc.num_words, decoder_n_layers, dropout)
+    decoder = LuongDecoderRnn('dot', embedding, hidden_size, voc.num_words, decoder_n_layers, dropout)
     if isLoadModel and modelFileIsExist:
         encoder.load_state_dict(encoder_sd)
         decoder.load_state_dict(decoder_sd)

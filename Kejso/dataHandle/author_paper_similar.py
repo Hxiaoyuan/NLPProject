@@ -3,6 +3,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 import random
 import os
+import xlrd
 
 base = declarative_base()
 
@@ -42,7 +43,8 @@ def random_combination(paperIds, paper_infos, author_info):
 
     for paperId in paperIds:
         if len(before_ids) > 0:
-            select_combination_ids = random.sample(before_ids, random_num) if len(before_ids) >= random_num else random.sample(before_ids, len(before_ids))
+            select_combination_ids = random.sample(before_ids, random_num) if len(
+                before_ids) >= random_num else random.sample(before_ids, len(before_ids))
             for _paperId in select_combination_ids:
                 # 负样例
                 random_id = random.choice(random_negative)
@@ -149,10 +151,35 @@ def random_combination(paperIds, paper_infos, author_info):
 
 
 def main():
+    # workboot = xlrd.open_workbook(r'F:\Python\Git\My\NLPProject\Kejso\org_aliases_new(1).xlsx')
+    # booksheet = workboot.sheet_by_name('org_aliases_new')
+    # p = list()
+    # for row in range(1, booksheet.nrows):
+    #     row_data = []
+    #     # for col in range(booksheet.ncols):
+    #
+    #     for col in [1, 2, 4, 5, 6]:
+    #         val = booksheet.cell(row, col).value
+    #     val = cel.value
+    #     print(val)
+    #     cel = booksheet.cell(row, 2)
+    #     val = cel.value
+    #     print(val)
+    #     cel = booksheet.cell(row, 4)
+    #     val = cel.value
+    #     print(val)
+    #     cel = booksheet.cell(row, 5)
+    #     val = cel.value
+    #     print(val)
+    #     cel = booksheet.cell(row, 6)
+    #     val = cel.value
+    #     print(val)
+
     engine = create_engine('mysql+mysqlconnector://haochengqian:Ww800880!@123.57.58.2:3306/haochengqian?charset=utf8')
     DBSession = sessionmaker(bind=engine)
     session = DBSession()
-    author_list = session.query(Author).filter(Author.scholarName != None, Author.scholarNamePinyin2 != None, Author.scholarNamePinyin != None).all()
+    author_list = session.query(Author).filter(Author.scholarName != None, Author.scholarNamePinyin2 != None,
+                                               Author.scholarNamePinyin != None).all()
     author_paperids = {}
     for author in author_list:
         if author_paperids.__contains__(author.peopleId):
@@ -161,7 +188,7 @@ def main():
             d.append(author.paperId)
             # author_paperids[author.paperId]['paperIds'].append(author.paperId)
         else:
-            author_paperids[author.paperId] = {
+            author_paperids[author.peopleId] = {
                 'scholarName': author.scholarName,
                 'scholarNamePinyin': author.scholarNamePinyin,
                 'scholarNamePinyin2': author.scholarNamePinyin2,
@@ -197,7 +224,8 @@ def main():
     with open(save_all_file_path, 'w', encoding='utf-8') as f:
         random.shuffle(save_file_infos)
         for index, p in enumerate(save_file_infos):
-            f.write(f"{p['title']}\t\1\t{p['title_en']}\t\1\t{p['scholarName']}\t\1\t{p['scholarNamePinyin']}\t\1\t{p['scholarNamePinyin2']}\t\1\t{p['label']}\n")
+            f.write(
+                f"{p['title']}\t\1\t{p['title_en']}\t\1\t{p['scholarName']}\t\1\t{p['scholarNamePinyin']}\t\1\t{p['scholarNamePinyin2']}\t\1\t{p['label']}\n")
 
     train_per = 0.8
     valid_per = 0.1
@@ -205,16 +233,19 @@ def main():
 
     all_data_len = len(save_file_infos)
 
-    train_f = open(os.path.join(save_path,'train.txt'), "w", encoding='utf-8')
-    valid_f = open(os.path.join(save_path,'valid.txt'), "w", encoding='utf-8')
-    test_f = open(os.path.join(save_path,'Test.txt'), "w", encoding='utf-8')
+    train_f = open(os.path.join(save_path, 'train.txt'), "w", encoding='utf-8')
+    valid_f = open(os.path.join(save_path, 'valid.txt'), "w", encoding='utf-8')
+    test_f = open(os.path.join(save_path, 'Test.txt'), "w", encoding='utf-8')
     for index, p in enumerate(save_file_infos):
         if index <= all_data_len * train_per:
-            train_f.write(f"{p['title']}\t\1\t{p['title_en']}\t\1\t{p['scholarName']}\t\1\t{p['scholarNamePinyin']}\t\1\t{p['scholarNamePinyin2']}\t\1\t{p['label']}\n")
+            train_f.write(
+                f"{p['title']}\t\1\t{p['title_en']}\t\1\t{p['scholarName']}\t\1\t{p['scholarNamePinyin']}\t\1\t{p['scholarNamePinyin2']}\t\1\t{p['label']}\n")
         elif index < all_data_len * (train_per + valid_per):
-            valid_f.write(f"{p['title']}\t\1\t{p['title_en']}\t\1\t{p['scholarName']}\t\1\t{p['scholarNamePinyin']}\t\1\t{p['scholarNamePinyin2']}\t\1\t{p['label']}\n")
+            valid_f.write(
+                f"{p['title']}\t\1\t{p['title_en']}\t\1\t{p['scholarName']}\t\1\t{p['scholarNamePinyin']}\t\1\t{p['scholarNamePinyin2']}\t\1\t{p['label']}\n")
         else:
-            test_f.write(f"{p['title']}\t\1\t{p['title_en']}\t\1\t{p['scholarName']}\t\1\t{p['scholarNamePinyin']}\t\1\t{p['scholarNamePinyin2']}\t\1\t{p['label']}\n")
+            test_f.write(
+                f"{p['title']}\t\1\t{p['title_en']}\t\1\t{p['scholarName']}\t\1\t{p['scholarNamePinyin']}\t\1\t{p['scholarNamePinyin2']}\t\1\t{p['label']}\n")
 
 
 if __name__ == '__main__':

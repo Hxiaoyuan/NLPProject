@@ -17,6 +17,7 @@ class BaseBertAndLuongAttnDecoderGRU(nn.Module):
                           dropout=(0 if n_layers == 1 else dropout))
 
     def forward(self, input_voc, last_hidden, encoder_output):
+
         embedded = self.embedding_dropout(input_voc)
         # GRU 单向转发
         rnn_output, hidden = self.gru(embedded, last_hidden)

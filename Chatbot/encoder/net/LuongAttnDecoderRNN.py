@@ -22,6 +22,7 @@ class LuongDecoderRnn(nn.Module):
         self.attn = Attn(attn_model, hidden_size)
 
     def forward(self, input_step, last_hidden, encoder_output):
+
         embedded = self.embedding(input_step)
         embedded = self.embedding_dropout(embedded)
 

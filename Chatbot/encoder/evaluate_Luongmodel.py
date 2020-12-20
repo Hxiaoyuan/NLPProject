@@ -26,7 +26,7 @@ def evaluate(encoder, decoder, input_seq, input_length, max_length):
 
 def evaluateInput(encoder, decoder, voc):
     input_sentence = ''
-    while (True):
+    while True:
         try:
             input_sentence = input('> ')
 

@@ -99,7 +99,7 @@ def trainIters(model_name, voc, pairs, encoder, decoder, encoder_optimizer,
 
 
 batch_size = 64
-learning_rate = 0.001
+learning_rate = 0.01
 n_iteration = 4000
 print_every = 10
 decoder_learning_ratio = 5.0

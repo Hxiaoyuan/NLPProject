@@ -12,6 +12,7 @@ class EncoderRNN(nn.Module):
                           dropout=(0 if n_layers == 1 else dropout), bidirectional=True)
 
     def forward(self, input_seq, input_lengths, hidden=None):
+
         embedded = self.embedding(input_seq)
         packed = nn.utils.rnn.pack_padded_sequence(embedded, input_lengths)
 
